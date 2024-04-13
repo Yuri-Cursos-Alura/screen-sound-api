@@ -17,8 +17,11 @@ public class ScreenSoundContext: DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder
-            .UseSqlServer(connectionString)
-            .UseLazyLoadingProxies(); 
+        optionsBuilder.UseSqlServer(connectionString);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Artista>().Navigation(a => a.Musicas).AutoInclude();
     }
 }
