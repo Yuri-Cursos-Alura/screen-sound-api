@@ -18,7 +18,7 @@ public class DAL<T> where T : class
     {
         return context.Set<T>().ToList();
     }
-    public IEnumerable<T> ListarCom<TCom>(Func<TCom, bool> include)
+    public IEnumerable<T> ListarCom<TCom>()
     {
         return context.Set<T>().ToList();
     }

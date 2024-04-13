@@ -22,6 +22,7 @@ public class ScreenSoundContext: DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Inserido por motivos de teste.
         modelBuilder.Entity<Artista>().Navigation(a => a.Musicas).AutoInclude();
     }
 }
