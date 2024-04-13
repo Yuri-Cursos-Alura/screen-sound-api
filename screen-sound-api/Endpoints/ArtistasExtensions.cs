@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using screen_sound_api.DTO;
 using ScreenSound.Banco;
 using ScreenSound.Modelos;
 
@@ -19,7 +20,14 @@ public static class ArtistasExtensions
     {
         var artistas = dal.Listar();
 
-        return Results.Ok(artistas);
+        List<ArtistaGet> dtoArtistas = [];
+
+        foreach (var artista in  artistas)
+        {
+            dtoArtistas.Add(ArtistaGet.Convert(artista));
+        }
+
+        return Results.Ok(dtoArtistas);
     }
 
     static IResult GetArtistaByNome([FromServices] DAL<Artista> dal, string nome)
@@ -30,14 +38,16 @@ public static class ArtistasExtensions
         if (artista is null)
             return Results.NotFound();
 
-        return Results.Ok(artista);
+        var dtoReturn = ArtistaGet.Convert(artista);
+
+        return Results.Ok(dtoReturn);
     }
 
-    static IResult PostArtista([FromServices] DAL<Artista> dal, [FromBody] Artista artista)
+    static IResult PostArtista([FromServices] DAL<Artista> dal, [FromBody] ArtistaPost post)
     {
-        artista.Id = 0;
+        Artista toAdd = new(post.Nome, post.Bio);
 
-        dal.Adicionar(artista);
+        dal.Adicionar(toAdd);
         return Results.Ok();
     }
 
@@ -56,16 +66,14 @@ public static class ArtistasExtensions
         return Results.Ok();
     }
 
-    static IResult PutArtista([FromServices] DAL<Artista> dal, [FromBody] Artista artista)
+    static IResult PutArtista([FromServices] DAL<Artista> dal, [FromBody] ArtistaPut put)
     {
-        Artista? toUpdate = dal.RecuperarPor(a => a.Id == artista.Id);
+        Artista? toUpdate = dal.RecuperarPor(a => a.Id == put.Id);
 
         if (toUpdate is null)
             return Results.NotFound();
 
-        toUpdate.Nome = artista.Nome;
-        toUpdate.FotoPerfil = artista.FotoPerfil;
-        toUpdate.Bio = artista.Bio;
+        put.Put(toUpdate);
 
         dal.Atualizar(toUpdate);
 

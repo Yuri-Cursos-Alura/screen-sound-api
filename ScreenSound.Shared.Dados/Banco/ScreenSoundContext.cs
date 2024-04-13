@@ -24,5 +24,6 @@ public class ScreenSoundContext: DbContext
     {
         // Inserido por motivos de teste.
         modelBuilder.Entity<Artista>().Navigation(a => a.Musicas).AutoInclude();
+        modelBuilder.Entity<Musica>().Navigation(a => a.Artista).AutoInclude();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using screen_sound_api.DTO;
 using ScreenSound.Banco;
 using ScreenSound.Modelos;
 
@@ -19,7 +20,12 @@ public static class MusicasExtensions
     {
         var musicas = dal.Listar();
 
-        return Results.Ok(musicas);
+        var dtoMusicas = new List<MusicaGet>();
+
+        foreach (var musica in musicas)
+            dtoMusicas.Add(MusicaGet.Convert(musica));
+
+        return Results.Ok(dtoMusicas);
     }
 
     static IResult GetMusicaByNome([FromServices] DAL<Musica> dal, string nome)
@@ -30,17 +36,19 @@ public static class MusicasExtensions
         if (musica is null)
             return Results.NotFound();
 
-        return Results.Ok(musica);
+        var dtoMusica = MusicaGet.Convert(musica);
+
+        return Results.Ok(dtoMusica);
     }
 
-    static IResult PostMusica([FromServices] DAL<Musica> dal, [FromServices] DAL<Artista> dalArtista, [FromBody] Musica musica, [FromQuery] int idArtista)
+    static IResult PostMusica([FromServices] DAL<Musica> dal, [FromServices] DAL<Artista> dalArtista, [FromBody] MusicaPost post, [FromQuery] int idArtista)
     {
-        musica.Id = 0;
-
         Artista? artista = dalArtista.RecuperarPor(a => a.Id == idArtista);
 
         if (artista is null)
             return Results.BadRequest();
+
+        var musica = post.Convert();
 
         dal.Adicionar(musica);
 
@@ -66,15 +74,14 @@ public static class MusicasExtensions
         return Results.Ok();
     }
 
-    static IResult PutMusica([FromServices] DAL<Musica> dal, [FromBody] Musica musica)
+    static IResult PutMusica([FromServices] DAL<Musica> dal, [FromBody] MusicaPut put)
     {
-        Musica? toUpdate = dal.RecuperarPor(a => a.Id == musica.Id);
+        Musica? toUpdate = dal.RecuperarPor(a => a.Id == put.Id);
 
         if (toUpdate is null)
             return Results.NotFound();
 
-        toUpdate.Nome = musica.Nome;
-        toUpdate.AnoLancamento = musica.AnoLancamento;
+        put.Put(toUpdate);
 
         dal.Atualizar(toUpdate);
 
