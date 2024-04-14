@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,9 +20,9 @@ public class DAL<T> where T : class
     {
         return context.Set<T>().ToList();
     }
-    public IEnumerable<T> ListarCom<TCom>()
+    public IEnumerable<T> ListarCom<TCom>(Expression<Func<T, TCom>> include)
     {
-        return context.Set<T>().ToList();
+        return context.Set<T>().Include(include).ToList();
     }
     public void Adicionar(T objeto)
     {

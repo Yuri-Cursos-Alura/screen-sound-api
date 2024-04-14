@@ -18,7 +18,7 @@ public static class MusicasExtensions
 
     static IResult GetMusicas([FromServices] DAL<Musica> dal)
     {
-        var musicas = dal.Listar();
+        var musicas = dal.ListarCom(u => u.Generos);
 
         var dtoMusicas = new List<MusicaGet>();
 
@@ -30,7 +30,6 @@ public static class MusicasExtensions
 
     static IResult GetMusicaByNome([FromServices] DAL<Musica> dal, string nome)
     {
-
         Musica? musica = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
 
         if (musica is null)
@@ -41,14 +40,23 @@ public static class MusicasExtensions
         return Results.Ok(dtoMusica);
     }
 
-    static IResult PostMusica([FromServices] DAL<Musica> dal, [FromServices] DAL<Artista> dalArtista, [FromBody] MusicaPost post, [FromQuery] int idArtista)
+    static IResult PostMusica([FromServices] DAL<Musica> dal, [FromServices] DAL<Artista> dalArtista, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaPost post, [FromQuery] int idArtista)
     {
         Artista? artista = dalArtista.RecuperarPor(a => a.Id == idArtista);
 
         if (artista is null)
             return Results.BadRequest();
 
-        var musica = post.Convert();
+        Musica musica;
+
+        try
+        {
+            musica = post.Convert(dalGenero);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(ex.Message);
+        }
 
         dal.Adicionar(musica);
 
@@ -74,14 +82,21 @@ public static class MusicasExtensions
         return Results.Ok();
     }
 
-    static IResult PutMusica([FromServices] DAL<Musica> dal, [FromBody] MusicaPut put)
+    static IResult PutMusica([FromServices] DAL<Musica> dal, [FromServices]DAL<Genero> dalGenero, [FromBody] MusicaPut put)
     {
         Musica? toUpdate = dal.RecuperarPor(a => a.Id == put.Id);
 
         if (toUpdate is null)
             return Results.NotFound();
 
-        put.Put(toUpdate);
+        try
+        {
+            put.Put(toUpdate, dalGenero);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(ex.Message);
+        }
 
         dal.Atualizar(toUpdate);
 

@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ScreenSoundContext>();
 builder.Services.AddTransient<DAL<Artista>>();
 builder.Services.AddTransient<DAL<Musica>>();
+builder.Services.AddTransient<DAL<Genero>>();
 
 var app = builder.Build();
 
@@ -24,5 +25,6 @@ if (app.Environment.IsDevelopment())
 
 app.AddEndPointsArtistas();
 app.AddEndPointsMusicas();
+app.AddEndPointsGeneros();
 
 app.Run();
