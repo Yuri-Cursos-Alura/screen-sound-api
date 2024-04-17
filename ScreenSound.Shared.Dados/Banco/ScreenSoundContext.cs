@@ -14,11 +14,18 @@ public class ScreenSoundContext: DbContext
     public DbSet<Musica> Musicas { get; set; }
     public DbSet<Genero> Generos { get; set; }
 
-    private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundApi;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+    private string localConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundApi;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+
+    public ScreenSoundContext(DbContextOptions<ScreenSoundContext> options) : base(options)
+    {
+
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(connectionString);
+        if (optionsBuilder.IsConfigured)
+            return;
+        optionsBuilder.UseSqlServer(localConnectionString);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
